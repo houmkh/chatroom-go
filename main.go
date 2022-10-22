@@ -201,8 +201,12 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	case "/api/user/register":
 		service.Register(w, r, dbConn)
 		break
-	case "/api/user/show_users":
-		service.ShowUsers(w, r, dbConn)
+	case "/api/admin/show_users":
+		service.ShowUsersInfo(w, r, dbConn)
+	case "/api/admin/delete_user":
+		service.DeleteUser(w, r, dbConn)
+	case "/api/admin/change_user_info":
+		service.ChangeUserInfo(w, r, dbConn)
 	}
 
 }

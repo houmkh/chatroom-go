@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jackc/pgx/v4"
+	"io/ioutil"
 	"net/http"
 )
 
-func ShowUsers(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
+func ShowUsersInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 	fmt.Println("func show users begin")
 	var err error
 	if err != nil {
@@ -27,4 +28,50 @@ func ShowUsers(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 	}
 	buf, _ := json.Marshal(&userArray)
 	w.Write(buf)
+}
+
+func DeleteUser(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
+
+	buf, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println("get user id failed")
+		return
+	}
+	var jsonMap = make(map[string]interface{})
+	err = json.Unmarshal(buf, &jsonMap)
+	if err != nil {
+		fmt.Println("unmarshal json failed")
+		return
+	}
+	sqlstr := `delete from userinfo where uid = $1`
+	_, err = dbConn.Exec(context.Background(), sqlstr, int(jsonMap["uid"].(float64)))
+	if err != nil {
+		fmt.Println("delete user from db failed")
+		return
+	}
+	msg := ReplyMsg{ServeStatus: 0, ResponseMessage: "successfully delete user"}
+	response(w, &msg)
+	fmt.Println("successfully delete user")
+}
+func ChangeUserInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
+	buf, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println("get user id failed")
+		return
+	}
+	var jsonMap = make(map[string]interface{})
+	err = json.Unmarshal(buf, &jsonMap)
+	if err != nil {
+		fmt.Println("unmarshal json failed")
+		return
+	}
+	sqlstr := `update userinfo set username = $1 where uid = $2`
+	_, err = dbConn.Exec(context.Background(), sqlstr, int(jsonMap["uid"].(float64)))
+	if err != nil {
+		fmt.Println("update user information failed")
+		return
+	}
+	msg := ReplyMsg{ServeStatus: 0, ResponseMessage: "successfully update user information user"}
+	response(w, &msg)
+	fmt.Println("successfully update user information user")
 }

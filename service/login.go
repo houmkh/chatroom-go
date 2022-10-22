@@ -11,7 +11,6 @@ import (
 )
 
 func Login(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
-	//todo 可能使用websocket与client沟通更合适
 	fmt.Println("func login begin")
 	var err error
 	buf, err := ioutil.ReadAll(r.Body)
@@ -34,10 +33,17 @@ func Login(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 		fmt.Println("not exist this user")
 		return
 	}
+	//判断密码是否正确
+	if pwd != jsonMap["password"] {
+		msg := ReplyMsg{ServeStatus: -1, ResponseMessage: "wrong password"}
+		response(w, &msg)
+		return
+	}
 	//将查询的用户id返回
 	var userinfo UserInfo
 	userinfo.Username = username
 	userinfo.Uid = uid
+	userinfo.Privilege = privilege
 	buf, err = json.Marshal(&userinfo)
 	if err != nil {
 		fmt.Println("response failed")

@@ -14,6 +14,7 @@ type UserInfo struct {
 	Username    string             `json:"username"`
 	Password    string             `json:"password"`
 	Uid         int                `json:"uid"`
+	Privilege   int                `json:"privilege"`
 	Send2Client chan BroadcastData `json:"-"` //一个用户带一个管道
 }
 
