@@ -65,7 +65,7 @@ func schedule() {
 func handleBroadcastData(data service.BroadcastData) {
 	//把消息队列里面的消息 塞到对应用户的管道中
 	fmt.Println("func handleBroadcastData begin")
-	if data.Type == "msg" {
+	if data.Type == "msg" || data.Type == "file" {
 		message := data.Data.(map[string]interface{})
 		from, _ := strconv.Atoi(message["from"].(string))
 		//to, _ := strconv.Atoi(message["to"].(string))
@@ -100,6 +100,63 @@ func writePump(conn *websocket.Conn, userInfo service.UserInfo) {
 	}
 }
 
+//func readPump(wsConn *websocket.Conn, user service.UserInfo) {
+//	var err error
+//	jsonMap := make(map[string]interface{})
+//	var buf []byte
+//	for {
+//		_, buf, err = wsConn.ReadMessage()
+//		err = json.Unmarshal(buf, &jsonMap)
+//		if err == io.EOF {
+//			offlineChan <- user
+//			fmt.Println("a user offline")
+//			break
+//		}
+//		fmt.Println(jsonMap)
+//		switch jsonMap["type"] {
+//		case "login":
+//			//用户登录 暂时先调用login函数 此时接收的data是用户登录的消息
+//			tempUser := jsonMap["data"].(map[string]interface{})
+//			if tempUser["username"] == nil || tempUser["uid"] == nil {
+//				fmt.Println("valid userinfo")
+//				return
+//			}
+//			user.Username = tempUser["username"].(string)
+//			user.Uid, _ = strconv.Atoi(tempUser["uid"].(string))
+//			user.Password = ""
+//			onlineChan <- user
+//			fmt.Println("login case")
+//			/*
+//				此时jsonMap中的data结构如下
+//				data: {
+//					"username" :xxx
+//					"password" :xxx
+//				}
+//			*/
+//			break
+//		case "msg":
+//			//处理信息接收 此时接收的data是消息
+//			/*
+//				此时jsonMap中的data结构如下
+//				data: {
+//					"From" : xxx
+//					"To" : xxx
+//					"Time" : xxx
+//					"Context" : xxx
+//				}
+//			*/
+//			var broadcastData service.BroadcastData
+//			broadcastData.Type = jsonMap["type"].(string)
+//			broadcastData.Data = jsonMap["data"]
+//			broadcastChan <- broadcastData
+//			fmt.Println("msg case")
+//
+//			break
+//		}
+//	}
+//}
+
+//websocket的配置
 var upgrade = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -113,16 +170,22 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	wsConn, err := upgrade.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("upgrade websocket failed")
-		//panic(err.Error())
 		return
 		//TODO zap
 	}
 
-	defer wsConn.Close()
+	defer func(wsConn *websocket.Conn) {
+		err := wsConn.Close()
+		if err != nil {
+			fmt.Println("websocket wrong close")
+			return
+		}
+	}(wsConn)
 	fmt.Println("websocket connect")
 	//新建用户
 	user := service.UserInfo{Send2Client: make(chan service.BroadcastData)}
 	go writePump(wsConn, user)
+	//go readPump(wsConn, user)
 	jsonMap := make(map[string]interface{})
 	var buf []byte
 	for {
@@ -137,7 +200,6 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		switch jsonMap["type"] {
 		case "login":
 			//用户登录 暂时先调用login函数 此时接收的data是用户登录的消息
-			//TODO login函数不一定从http里面读 websocket可以用来传数据
 			tempUser := jsonMap["data"].(map[string]interface{})
 			if tempUser["username"] == nil || tempUser["uid"] == nil {
 				fmt.Println("valid userinfo")
@@ -148,7 +210,6 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 			user.Password = ""
 			onlineChan <- user
 			fmt.Println("login case")
-
 			/*
 				此时jsonMap中的data结构如下
 				data: {
@@ -156,20 +217,6 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 					"password" :xxx
 				}
 			*/
-			//tempUser := jsonMap["data"].(map[string]interface{})
-			//遍历map的方法
-			//for key,value := range tempUser
-			//fmt.Println(tempUser)
-
-			//sqlstr := `select uid, username, pwd,privilege from userinfo where username= $1`
-			//result := dbConn.QueryRow(context.Background(), sqlstr, tempUser["username"])
-			//var username, pwd string
-			//var privilege, uid int
-			//err = result.Scan(&uid, &username, &pwd, &privilege)
-			//if err == pgx.ErrNoRows {
-			//	fmt.Println("login failed")
-			//	return
-			//}
 			break
 		case "msg":
 			//处理信息接收 此时接收的data是消息
@@ -189,7 +236,26 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("msg case")
 
 			break
+		case "file":
+			//处理信息接收 此时接收的data是消息
+			/*
+				此时jsonMap中的data结构如下
+				data: {
+					"From" : xxx
+					"To" : xxx
+					"Time" : xxx
+					"Context" : xxx
+				}
+			*/
+			var broadcastData service.BroadcastData
+			broadcastData.Type = jsonMap["type"].(string)
+			broadcastData.Data = jsonMap["data"]
+			broadcastChan <- broadcastData
+			fmt.Println("file case")
+
+			break
 		}
+
 	}
 }
 func serveHome(w http.ResponseWriter, r *http.Request) {
@@ -201,12 +267,25 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	case "/api/user/register":
 		service.Register(w, r, dbConn)
 		break
+	case "/api/user/upload_file":
+		service.UploadFile(w, r, dbConn)
+		break
+	case "/api/user/show_files":
+		service.ShowFiles(w, r, dbConn)
+		break
+	case "/api/user/download_file":
+		service.DownloadFile(w, r, dbConn)
+		break
 	case "/api/admin/show_users":
 		service.ShowUsersInfo(w, r, dbConn)
+		break
 	case "/api/admin/delete_user":
 		service.DeleteUser(w, r, dbConn)
+		break
 	case "/api/admin/change_user_info":
 		service.ChangeUserInfo(w, r, dbConn)
+		break
+
 	}
 
 }

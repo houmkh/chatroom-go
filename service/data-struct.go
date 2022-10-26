@@ -20,15 +20,31 @@ type UserInfo struct {
 
 //Message 消息的结构体
 type Message struct {
-	From     int    `json:"from"` //来自谁 email
-	To       int    `json:"to"`   //发给谁 email 空表示表示所有人
+	From     int    `json:"from"` //来自谁
+	To       int    `json:"to"`   //发给谁
 	FromName string `json:"from_name"`
 	ToName   string `json:"to_name"`
-	Time     string `json:"time"`    //消息发出的时间
-	Context  string `json:"context"` //消息内容
+	//Time     string `json:"time"`    //消息发出的时间
+	Context string `json:"context"` //消息内容
 }
 
 type RoomInfo struct {
 	OnlineNum      int        `json:"online_num"`       //在线人数
 	OnlineUserList []UserInfo `json:"online_user_list"` //在线用户列表
+}
+
+//type File struct {
+//	From        int    `json:"from"` //来自谁
+//	To          int    `json:"to"`   //发给谁
+//	FromName    string `json:"from_name"`
+//	ToName      string `json:"to_name"`
+//	FileName    string `json:"file_name"`
+//	FileType    string `json:"file_type"`
+//	FileContext string `json:"file_context"`
+//}
+
+type File struct {
+	Fid      int    `json:"fid"`
+	FileName string `json:"file_name"`
+	FilePath string `json:"file_path"`
 }
