@@ -34,10 +34,8 @@ func schedule() {
 			handleBroadcastData(broadcastData)
 		case userLogin := <-onlineChan:
 			userList[userLogin.Uid] = userLogin
-			fmt.Println("a user login")
-			fmt.Println(userLogin)
 			roomInfoChan <- 1
-			fmt.Println("test")
+			fmt.Println("a user login")
 		case userQuit := <-offlineChan:
 			delete(userList, userQuit.Uid)
 			roomInfoChan <- 1
@@ -96,65 +94,8 @@ func writePump(conn *websocket.Conn, userInfo service.UserInfo) {
 		//buf, _ := json.Marshal(&sendData)
 		//conn.WriteMessage(websocket.,buf)
 		conn.WriteJSON(sendData)
-		fmt.Println("writePump")
 	}
 }
-
-//func readPump(wsConn *websocket.Conn, user service.UserInfo) {
-//	var err error
-//	jsonMap := make(map[string]interface{})
-//	var buf []byte
-//	for {
-//		_, buf, err = wsConn.ReadMessage()
-//		err = json.Unmarshal(buf, &jsonMap)
-//		if err == io.EOF {
-//			offlineChan <- user
-//			fmt.Println("a user offline")
-//			break
-//		}
-//		fmt.Println(jsonMap)
-//		switch jsonMap["type"] {
-//		case "login":
-//			//用户登录 暂时先调用login函数 此时接收的data是用户登录的消息
-//			tempUser := jsonMap["data"].(map[string]interface{})
-//			if tempUser["username"] == nil || tempUser["uid"] == nil {
-//				fmt.Println("valid userinfo")
-//				return
-//			}
-//			user.Username = tempUser["username"].(string)
-//			user.Uid, _ = strconv.Atoi(tempUser["uid"].(string))
-//			user.Password = ""
-//			onlineChan <- user
-//			fmt.Println("login case")
-//			/*
-//				此时jsonMap中的data结构如下
-//				data: {
-//					"username" :xxx
-//					"password" :xxx
-//				}
-//			*/
-//			break
-//		case "msg":
-//			//处理信息接收 此时接收的data是消息
-//			/*
-//				此时jsonMap中的data结构如下
-//				data: {
-//					"From" : xxx
-//					"To" : xxx
-//					"Time" : xxx
-//					"Context" : xxx
-//				}
-//			*/
-//			var broadcastData service.BroadcastData
-//			broadcastData.Type = jsonMap["type"].(string)
-//			broadcastData.Data = jsonMap["data"]
-//			broadcastChan <- broadcastData
-//			fmt.Println("msg case")
-//
-//			break
-//		}
-//	}
-//}
 
 //websocket的配置
 var upgrade = websocket.Upgrader{
@@ -196,7 +137,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("a user offline")
 			break
 		}
-		fmt.Println(jsonMap)
+		//fmt.Println(jsonMap)
 		switch jsonMap["type"] {
 		case "login":
 			//用户登录 暂时先调用login函数 此时接收的data是用户登录的消息

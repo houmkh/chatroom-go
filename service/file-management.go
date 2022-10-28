@@ -34,8 +34,8 @@ func UploadFile(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 		panic(err.Error())
 		return
 	}
-	defer newFile.Close()
 	_, err = io.Copy(newFile, file)
+	defer newFile.Close()
 	if err != nil {
 		fmt.Println("fail to copy file")
 		return
@@ -66,12 +66,21 @@ func ShowFiles(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 		fmt.Println("fail to read files")
 		return
 	}
+	err = resultSet.Err()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	var fileList []File
 	for resultSet.Next() {
 		var filename string
 		var filepath string
 		var fid int
-		resultSet.Scan(&filename, &filepath, &fid)
+		err := resultSet.Scan(&filename, &filepath, &fid)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 		var file File
 		file.FileName = filename
 		file.FilePath = filepath

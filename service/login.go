@@ -34,6 +34,7 @@ func Login(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 		return
 	}
 	//判断密码是否正确
+	//fmt.Println(pwd, " ", jsonMap["password"])
 	if pwd != jsonMap["password"] {
 		msg := ReplyMsg{ServeStatus: -1, ResponseMessage: "wrong password"}
 		response(w, &msg)
