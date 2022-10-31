@@ -5,6 +5,7 @@ package main
 
 import (
 	"bufio"
+	"chatroom/cmn"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -35,7 +36,7 @@ Invalid service developer information, please specify
 
 `
 
-func ServiceEnrollGenerate() {
+func main() {
 
 	fmt.Printf("hello\n")
 	type service struct {
@@ -58,6 +59,8 @@ func ServiceEnrollGenerate() {
 	moduleName := strings.ReplaceAll(strings.ReplaceAll(string(s), "\n", ""), "\r", "")
 
 	//-----------------
+	fmt.Printf("ReadDir\n")
+
 	directories, err := ioutil.ReadDir("../serve")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -159,8 +162,10 @@ func ServiceEnrollGenerate() {
 			continue
 		}
 	}
+	fmt.Printf("end loap1\n")
 
 	if len(services) == 0 {
+		fmt.Println("len service = 0")
 		return
 	}
 
@@ -174,23 +179,28 @@ func ServiceEnrollGenerate() {
 			ServiceName: v.ServiceName, Author: d,
 		}
 	}
+	fmt.Printf("end loap2\n")
 
 	tmplArg := templateArg{
 		ModuleName: string(moduleName),
 		Services:   services,
 	}
+	fmt.Printf("ParseFiles\n")
 
 	t, err := template.ParseFiles("services.go.tmpl")
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
+	fmt.Printf("Create\n")
+
 	f, err := os.Create("services-generated.go")
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 	defer f.Close()
+	fmt.Printf("run services.go.tmpl\n")
 
 	err = t.ExecuteTemplate(f, "services.go.tmpl", tmplArg)
 	if err != nil {

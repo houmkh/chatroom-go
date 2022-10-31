@@ -1,6 +1,8 @@
-package serve
+package file_management
 
 import (
+	"chatroom/cmn"
+	"chatroom/serve"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,8 +16,30 @@ import (
 	"time"
 )
 
-//annotation:file-management
-//author:{"name":"file-management","tel":"15521212871","email":"jiaying.hou@qq.com"}
+//annotation:file_management-service
+//author:{"name":"file_management","tel":"15521212871","email":"jiaying.hou@qq.com"}
+
+func Enroll(author string) {
+	var developer *cmn.ModuleAuthor
+
+	if author != "" {
+		var d cmn.ModuleAuthor
+		err := json.Unmarshal([]byte(author), &d)
+		if err != nil {
+			return
+		}
+		developer = &d
+	}
+
+	cmn.AddService(&cmn.ServeEndPoint{
+		//Fn: user,
+
+		Path: "/file_management",
+		Name: "file_management",
+
+		Developer: developer,
+	})
+}
 
 const filePath = "D:/GoProject/chatroom/user-files"
 
@@ -74,7 +98,7 @@ func ShowFiles(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 		fmt.Println(err)
 		return
 	}
-	var fileList []File
+	var fileList []serve.File
 	for resultSet.Next() {
 		var filename string
 		var filepath string
@@ -84,7 +108,7 @@ func ShowFiles(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 			fmt.Println(err.Error())
 			return
 		}
-		var file File
+		var file serve.File
 		file.FileName = filename
 		file.FilePath = filepath
 		file.Fid = fid

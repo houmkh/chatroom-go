@@ -1,6 +1,9 @@
-package serve
+package user_management
 
 import (
+	"chatroom/cmn"
+	"chatroom/serve"
+	reply_msg "chatroom/serve/reply_msg"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,23 +12,43 @@ import (
 	"net/http"
 )
 
-//annotation:user-management
-//author:{"name":"user-management","tel":"15521212871","email":"jiaying.hou@qq.com"}
+//annotation:user_management-service
+//author:{"name":"user_management","tel":"15521212871","email":"jiaying.hou@qq.com"}
+func Enroll(author string) {
+	var developer *cmn.ModuleAuthor
 
+	if author != "" {
+		var d cmn.ModuleAuthor
+		err := json.Unmarshal([]byte(author), &d)
+		if err != nil {
+			return
+		}
+		developer = &d
+	}
+
+	cmn.AddService(&cmn.ServeEndPoint{
+		//Fn: user,
+
+		Path: "/user_management",
+		Name: "user_management",
+
+		Developer: developer,
+	})
+}
 func ShowUsersInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 	fmt.Println("func show users begin")
 	var err error
 	if err != nil {
 		fmt.Println(err.Error())
-		msg := ReplyMsg{ServeStatus: -200, ResponseMessage: "read msg failed"}
-		response(w, &msg)
+		msg := serve.ReplyMsg{ServeStatus: -200, ResponseMessage: "read msg failed"}
+		reply_msg.Response(w, &msg)
 	}
-	userArray := make([]UserInfo, 0)
+	userArray := make([]serve.UserInfo, 0)
 	sqlstr := `select uid, username from userinfo where privilege = 1`
 	result, _ := dbConn.Query(context.Background(), sqlstr)
 	defer result.Close()
 	for result.Next() {
-		var user UserInfo
+		var user serve.UserInfo
 		result.Scan(&user.Uid, &user.Username)
 		userArray = append(userArray, user)
 	}
@@ -52,8 +75,8 @@ func DeleteUser(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 		fmt.Println("delete user from db failed")
 		return
 	}
-	msg := ReplyMsg{ServeStatus: 0, ResponseMessage: "successfully delete user"}
-	response(w, &msg)
+	msg := serve.ReplyMsg{ServeStatus: 0, ResponseMessage: "successfully delete user"}
+	reply_msg.Response(w, &msg)
 	fmt.Println("successfully delete user")
 }
 func ChangeUserInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
@@ -74,7 +97,7 @@ func ChangeUserInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 		fmt.Println("update user information failed")
 		return
 	}
-	msg := ReplyMsg{ServeStatus: 0, ResponseMessage: "successfully update user information user"}
-	response(w, &msg)
+	msg := serve.ReplyMsg{ServeStatus: 0, ResponseMessage: "successfully update user information user"}
+	reply_msg.Response(w, &msg)
 	fmt.Println("successfully update user information user")
 }

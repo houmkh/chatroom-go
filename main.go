@@ -2,6 +2,10 @@ package main
 
 import (
 	"chatroom/serve"
+	"chatroom/serve/file_management"
+	"chatroom/serve/login"
+	"chatroom/serve/register"
+	"chatroom/serve/user_management"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -203,28 +207,28 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	requestUrl := r.URL.Path
 	switch requestUrl {
 	case "/api/user/login":
-		serve.Login(w, r, dbConn)
+		login.Login(w, r, dbConn)
 		break
 	case "/api/user/register":
-		serve.Register(w, r, dbConn)
+		register.Register(w, r, dbConn)
 		break
 	case "/api/user/upload_file":
-		serve.UploadFile(w, r, dbConn)
+		file_management.UploadFile(w, r, dbConn)
 		break
 	case "/api/user/show_files":
-		serve.ShowFiles(w, r, dbConn)
+		file_management.ShowFiles(w, r, dbConn)
 		break
 	case "/api/user/download_file":
-		serve.DownloadFile(w, r, dbConn)
+		file_management.DownloadFile(w, r, dbConn)
 		break
 	case "/api/admin/show_users":
-		serve.ShowUsersInfo(w, r, dbConn)
+		user_management.ShowUsersInfo(w, r, dbConn)
 		break
 	case "/api/admin/delete_user":
-		serve.DeleteUser(w, r, dbConn)
+		user_management.DeleteUser(w, r, dbConn)
 		break
 	case "/api/admin/change_user_info":
-		serve.ChangeUserInfo(w, r, dbConn)
+		user_management.ChangeUserInfo(w, r, dbConn)
 		break
 
 	}
