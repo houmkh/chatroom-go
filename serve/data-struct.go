@@ -1,4 +1,4 @@
-package service
+package serve
 
 type ReplyMsg struct {
 	ServeStatus     int    `json:"serve_status"`

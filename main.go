@@ -1,7 +1,7 @@
 package main
 
 import (
-	"chatroom/service"
+	"chatroom/serve"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -15,13 +15,13 @@ import (
 
 var (
 	//用户列表
-	userList = make(map[int]service.UserInfo)
+	userList = make(map[int]serve.UserInfo)
 	//记录用户登录
-	onlineChan = make(chan service.UserInfo)
+	onlineChan = make(chan serve.UserInfo)
 	//记录用户登出
-	offlineChan = make(chan service.UserInfo)
+	offlineChan = make(chan serve.UserInfo)
 	//广播消息队列
-	broadcastChan = make(chan service.BroadcastData, 10000)
+	broadcastChan = make(chan serve.BroadcastData, 10000)
 	//记录聊天室人数变化
 	roomInfoChan = make(chan int, 100)
 )
@@ -41,15 +41,15 @@ func schedule() {
 			roomInfoChan <- 1
 			fmt.Println("a user quit")
 		case <-roomInfoChan:
-			var onlineUserList []service.UserInfo
+			var onlineUserList []serve.UserInfo
 			for _, value := range userList {
 				onlineUserList = append(onlineUserList, value)
 			}
-			var roomInfo service.RoomInfo
+			var roomInfo serve.RoomInfo
 			roomInfo.OnlineNum = len(userList)
 			roomInfo.OnlineUserList = onlineUserList
 			fmt.Println(roomInfo)
-			room := service.BroadcastData{
+			room := serve.BroadcastData{
 				Type: "room_info",
 				Data: roomInfo,
 			}
@@ -60,7 +60,7 @@ func schedule() {
 }
 
 //只实现一次只给一个人发消息
-func handleBroadcastData(data service.BroadcastData) {
+func handleBroadcastData(data serve.BroadcastData) {
 	//把消息队列里面的消息 塞到对应用户的管道中
 	fmt.Println("func handleBroadcastData begin")
 	if data.Type == "msg" || data.Type == "file" {
@@ -89,7 +89,7 @@ func handleBroadcastData(data service.BroadcastData) {
 		fmt.Println("broadcast")
 	}
 }
-func writePump(conn *websocket.Conn, userInfo service.UserInfo) {
+func writePump(conn *websocket.Conn, userInfo serve.UserInfo) {
 	for sendData := range userInfo.Send2Client {
 		//buf, _ := json.Marshal(&sendData)
 		//conn.WriteMessage(websocket.,buf)
@@ -124,7 +124,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	}(wsConn)
 	fmt.Println("websocket connect")
 	//新建用户
-	user := service.UserInfo{Send2Client: make(chan service.BroadcastData)}
+	user := serve.UserInfo{Send2Client: make(chan serve.BroadcastData)}
 	go writePump(wsConn, user)
 	//go readPump(wsConn, user)
 	jsonMap := make(map[string]interface{})
@@ -170,7 +170,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 					"Context" : xxx
 				}
 			*/
-			var broadcastData service.BroadcastData
+			var broadcastData serve.BroadcastData
 			broadcastData.Type = jsonMap["type"].(string)
 			broadcastData.Data = jsonMap["data"]
 			broadcastChan <- broadcastData
@@ -188,7 +188,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 					"Context" : xxx
 				}
 			*/
-			var broadcastData service.BroadcastData
+			var broadcastData serve.BroadcastData
 			broadcastData.Type = jsonMap["type"].(string)
 			broadcastData.Data = jsonMap["data"]
 			broadcastChan <- broadcastData
@@ -203,28 +203,28 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	requestUrl := r.URL.Path
 	switch requestUrl {
 	case "/api/user/login":
-		service.Login(w, r, dbConn)
+		serve.Login(w, r, dbConn)
 		break
 	case "/api/user/register":
-		service.Register(w, r, dbConn)
+		serve.Register(w, r, dbConn)
 		break
 	case "/api/user/upload_file":
-		service.UploadFile(w, r, dbConn)
+		serve.UploadFile(w, r, dbConn)
 		break
 	case "/api/user/show_files":
-		service.ShowFiles(w, r, dbConn)
+		serve.ShowFiles(w, r, dbConn)
 		break
 	case "/api/user/download_file":
-		service.DownloadFile(w, r, dbConn)
+		serve.DownloadFile(w, r, dbConn)
 		break
 	case "/api/admin/show_users":
-		service.ShowUsersInfo(w, r, dbConn)
+		serve.ShowUsersInfo(w, r, dbConn)
 		break
 	case "/api/admin/delete_user":
-		service.DeleteUser(w, r, dbConn)
+		serve.DeleteUser(w, r, dbConn)
 		break
 	case "/api/admin/change_user_info":
-		service.ChangeUserInfo(w, r, dbConn)
+		serve.ChangeUserInfo(w, r, dbConn)
 		break
 
 	}

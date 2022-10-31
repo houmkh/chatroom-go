@@ -1,4 +1,4 @@
-package service
+package serve
 
 import (
 	"context"
@@ -8,6 +8,9 @@ import (
 	"io/ioutil"
 	"net/http"
 )
+
+//annotation:register
+//author:{"name":"register","tel":"15521212871","email":"jiaying.hou@qq.com"}
 
 func Register(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 	fmt.Println("func register begin")

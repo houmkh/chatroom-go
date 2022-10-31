@@ -1,4 +1,4 @@
-package service
+package serve
 
 import (
 	"context"
@@ -13,6 +13,9 @@ import (
 	"strings"
 	"time"
 )
+
+//annotation:file-management
+//author:{"name":"file-management","tel":"15521212871","email":"jiaying.hou@qq.com"}
 
 const filePath = "D:/GoProject/chatroom/user-files"
 

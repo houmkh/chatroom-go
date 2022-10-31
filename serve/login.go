@@ -1,4 +1,4 @@
-package service
+package serve
 
 import (
 	"context"
@@ -9,6 +9,31 @@ import (
 	"io/ioutil"
 	"net/http"
 )
+
+//annotation:file-management
+//author:{"name":"file-management","tel":"15521212871","email":"jiaying.hou@qq.com"}
+
+//func Enroll(author string) {
+//	var developer *cmn.ModuleAuthor
+//
+//	if author != "" {
+//		var d cmn.ModuleAuthor
+//		err := json.Unmarshal([]byte(author), &d)
+//		if err != nil {
+//			return
+//		}
+//		developer = &d
+//	}
+//
+//	cmn.AddService(&cmn.ServeEndPoint{
+//		//Fn: user,
+//
+//		Path: "/user",
+//		Name: "user",
+//
+//		Developer: developer,
+//	})
+//}
 
 func Login(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 	fmt.Println("func login begin")

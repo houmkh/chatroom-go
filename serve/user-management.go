@@ -1,4 +1,4 @@
-package service
+package serve
 
 import (
 	"context"
@@ -8,6 +8,9 @@ import (
 	"io/ioutil"
 	"net/http"
 )
+
+//annotation:user-management
+//author:{"name":"user-management","tel":"15521212871","email":"jiaying.hou@qq.com"}
 
 func ShowUsersInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 	fmt.Println("func show users begin")
