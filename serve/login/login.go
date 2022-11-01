@@ -18,7 +18,6 @@ import (
 
 func Enroll(author string) {
 	var developer *cmn.ModuleAuthor
-
 	if author != "" {
 		var d cmn.ModuleAuthor
 		err := json.Unmarshal([]byte(author), &d)
@@ -29,17 +28,20 @@ func Enroll(author string) {
 	}
 
 	cmn.AddService(&cmn.ServeEndPoint{
-		//Fn: user,
+		Fn: Login,
 
-		Path: "/login",
-		Name: "login",
+		Path: "/user/login",
+		Name: "/user/login",
 
 		Developer: developer,
 	})
+
 }
 
 func Login(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
+
 	fmt.Println("func login begin")
+
 	var err error
 	buf, err := ioutil.ReadAll(r.Body)
 	if err != nil {

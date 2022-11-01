@@ -3,6 +3,9 @@ package cmn
 import (
 	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v4"
+	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -13,6 +16,7 @@ type ModuleAuthor struct {
 	Addi  string `json:"addi"`
 }
 type ServeEndPoint struct {
+	Fn        func(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn)
 	Path      string
 	Name      string
 	Developer *ModuleAuthor
@@ -55,9 +59,9 @@ func AddService(ep *ServeEndPoint) (err error) {
 		//		break
 		//	}
 		//
-		//	if !rIsAPI.MatchString(ep.Path) {
-		//		ep.Path = strings.ReplaceAll("/api/"+ep.Path, "//", "/")
-		//	}
+		//if !rIsAPI.MatchString(ep.Path) {
+		ep.Path = strings.ReplaceAll("/api/"+ep.Path, "//", "/")
+		//}
 		//}
 
 		if ep.Name == "" {

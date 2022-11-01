@@ -38,7 +38,7 @@ Invalid service developer information, please specify
 
 func main() {
 
-	fmt.Printf("hello\n")
+	//fmt.Printf("hello\n")
 	type service struct {
 		ServiceName string `json:"serviceName"`
 
@@ -59,7 +59,7 @@ func main() {
 	moduleName := strings.ReplaceAll(strings.ReplaceAll(string(s), "\n", ""), "\r", "")
 
 	//-----------------
-	fmt.Printf("ReadDir\n")
+	//fmt.Printf("ReadDir\n")
 
 	directories, err := ioutil.ReadDir("../serve")
 	if err != nil {
@@ -162,7 +162,7 @@ func main() {
 			continue
 		}
 	}
-	fmt.Printf("end loap1\n")
+	//fmt.Printf("end loap1\n")
 
 	if len(services) == 0 {
 		fmt.Println("len service = 0")
@@ -179,20 +179,20 @@ func main() {
 			ServiceName: v.ServiceName, Author: d,
 		}
 	}
-	fmt.Printf("end loap2\n")
+	//fmt.Printf("end loap2\n")
 
 	tmplArg := templateArg{
 		ModuleName: string(moduleName),
 		Services:   services,
 	}
-	fmt.Printf("ParseFiles\n")
+	//fmt.Printf("ParseFiles\n")
 
 	t, err := template.ParseFiles("services.go.tmpl")
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Printf("Create\n")
+	//fmt.Printf("Create\n")
 
 	f, err := os.Create("services-generated.go")
 	if err != nil {
@@ -200,7 +200,7 @@ func main() {
 		return
 	}
 	defer f.Close()
-	fmt.Printf("run services.go.tmpl\n")
+	//fmt.Printf("run services.go.tmpl\n")
 
 	err = t.ExecuteTemplate(f, "services.go.tmpl", tmplArg)
 	if err != nil {

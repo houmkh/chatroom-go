@@ -27,25 +27,47 @@ func Enroll(author string) {
 	}
 
 	cmn.AddService(&cmn.ServeEndPoint{
-		//Fn: user,
+		Fn: ShowUsersInfo,
 
-		Path: "/user_management",
-		Name: "user_management",
+		Path: "/admin/show_users",
+		Name: "/admin/show_users",
+
+		Developer: developer,
+	})
+	cmn.AddService(&cmn.ServeEndPoint{
+		Fn: DeleteUser,
+
+		Path: "/admin/delete_user",
+		Name: "/admin/delete_user",
+
+		Developer: developer,
+	})
+	cmn.AddService(&cmn.ServeEndPoint{
+		Fn: ChangeUserInfo,
+
+		Path: "/admin/change_user_info",
+		Name: "/admin/change_user_info",
 
 		Developer: developer,
 	})
 }
 func ShowUsersInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 	fmt.Println("func show users begin")
-	var err error
-	if err != nil {
-		fmt.Println(err.Error())
-		msg := serve.ReplyMsg{ServeStatus: -200, ResponseMessage: "read msg failed"}
-		reply_msg.Response(w, &msg)
+	//var err error
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//	msg := serve.ReplyMsg{ServeStatus: -200, ResponseMessage: "read msg failed"}
+	//	reply_msg.Response(w, &msg)
+	//}
+	if dbConn == nil {
+		fmt.Println("nil")
 	}
 	userArray := make([]serve.UserInfo, 0)
 	sqlstr := `select uid, username from userinfo where privilege = 1`
-	result, _ := dbConn.Query(context.Background(), sqlstr)
+	result, err := dbConn.Query(context.Background(), sqlstr)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	defer result.Close()
 	for result.Next() {
 		var user serve.UserInfo

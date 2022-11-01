@@ -28,10 +28,10 @@ func Enroll(author string) {
 	}
 
 	cmn.AddService(&cmn.ServeEndPoint{
-		//Fn: user,
+		Fn: Register,
 
-		Path: "/register",
-		Name: "register",
+		Path: "/user/register",
+		Name: "/user/register",
 
 		Developer: developer,
 	})

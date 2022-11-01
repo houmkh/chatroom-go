@@ -6,7 +6,7 @@ import (
 	"chatroom/serve/login"
 	"chatroom/serve/register"
 	"chatroom/serve/user_management"
-	"context"
+	"chatroom/service"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
@@ -63,6 +63,7 @@ func schedule() {
 	}
 }
 
+//TODO 要测试的函数！！
 //只实现一次只给一个人发消息
 func handleBroadcastData(data serve.BroadcastData) {
 	//把消息队列里面的消息 塞到对应用户的管道中
@@ -235,28 +236,30 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 }
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "021020"
-	dbname   = "chatroom"
-)
+//const (
+//	host     = "localhost"
+//	port     = 5432
+//	user     = "postgres"
+//	password = "021020"
+//	dbname   = "chatroom"
+//)
 
 var dbConn *pgx.Conn
 
 func main() {
-	var err error
-	dbConnParam := fmt.Sprintf(`%s://%s:%s@%s:%d/%s`, user, user, password, host, port, dbname)
-	dbConn, err = pgx.Connect(context.Background(), dbConnParam)
-	if err != nil {
-		fmt.Println("failed to connect database")
-		//panic(err.Error())
-	} else {
-		fmt.Println("connect database successfully")
-	}
+	//var err error
+	//dbConnParam := fmt.Sprintf(`%s://%s:%s@%s:%d/%s`, user, user, password, host, port, dbname)
+	//dbConn, err = pgx.Connect(context.Background(), dbConnParam)
+	//if err != nil {
+	//	fmt.Println("failed to connect database")
+	//	//panic(err.Error())
+	//} else {
+	//	fmt.Println("connect database successfully")
+	//}
+	//dbConn = dao.ConnDB()
 	go schedule()
-	http.HandleFunc("/", serveHome)
+	service.WebServe()
+	//http.HandleFunc("/", serveHome)
 	http.HandleFunc("/chat", func(writer http.ResponseWriter, request *http.Request) {
 		serveWs(writer, request)
 	})

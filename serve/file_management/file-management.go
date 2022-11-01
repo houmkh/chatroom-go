@@ -32,10 +32,26 @@ func Enroll(author string) {
 	}
 
 	cmn.AddService(&cmn.ServeEndPoint{
-		//Fn: user,
+		Fn: UploadFile,
 
-		Path: "/file_management",
-		Name: "file_management",
+		Path: "/user/upload_file",
+		Name: "user/upload_file",
+
+		Developer: developer,
+	})
+	cmn.AddService(&cmn.ServeEndPoint{
+		Fn: ShowFiles,
+
+		Path: "/user/show_files",
+		Name: "user/show_files",
+
+		Developer: developer,
+	})
+	cmn.AddService(&cmn.ServeEndPoint{
+		Fn: DownloadFile,
+
+		Path: "/user/download_file",
+		Name: "user/download_file",
 
 		Developer: developer,
 	})
