@@ -14,7 +14,6 @@ import (
 	"github.com/jackc/pgx/v4"
 	"io"
 	"net/http"
-	"strconv"
 )
 
 var (
@@ -69,8 +68,10 @@ func handleBroadcastData(data serve.BroadcastData) {
 	//把消息队列里面的消息 塞到对应用户的管道中
 	fmt.Println("func handleBroadcastData begin")
 	if data.Type == "msg" || data.Type == "file" {
+		//println(data.Data)
 		message := data.Data.(map[string]interface{})
-		from, _ := strconv.Atoi(message["from"].(string))
+		//from, _ := strconv.Atoi(message["from"].(string))
+		from := int(message["from"].(float64))
 		//to, _ := strconv.Atoi(message["to"].(string))
 		to := int(message["to"].(float64))
 		message["from_name"] = userList[from].Username
@@ -126,6 +127,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("websocket wrong close")
 			return
 		}
+		println("websocket close")
 	}(wsConn)
 	fmt.Println("websocket connect")
 	//新建用户
@@ -152,7 +154,8 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			user.Username = tempUser["username"].(string)
-			user.Uid, _ = strconv.Atoi(tempUser["uid"].(string))
+			//user.Uid, _ = strconv.Atoi(tempUser["uid"].(string))
+			user.Uid = int(tempUser["uid"].(float64))
 			user.Password = ""
 			onlineChan <- user
 			fmt.Println("login case")

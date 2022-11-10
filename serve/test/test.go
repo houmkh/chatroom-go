@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-//annotation:user_management-service
+//annotation:test-service
 //author:{"name":"user_management","tel":"15521212871","email":"jiaying.hou@qq.com"}
 func Enroll(author string) {
 	var developer *cmn.ModuleAuthor
