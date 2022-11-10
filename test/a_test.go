@@ -19,7 +19,7 @@ var (
 	// 每个连接发送的信息数量 = msgNums + 1
 	msgNums = 2000
 	wg      sync.WaitGroup
-	//end     = false
+	end     = false
 )
 var d1 = serve.UserInfo{Password: "123", Username: "u1"}
 var d2 = serve.UserInfo{Password: "123", Username: "a"}
@@ -33,7 +33,7 @@ var msg1 = serve.BroadcastData{Type: "msg", Data: m1}
 var msg2 = serve.BroadcastData{Type: "msg", Data: m2}
 
 func Worker(id int) {
-	end := false
+	//end := false
 
 	ws, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
@@ -76,10 +76,10 @@ func Worker(id int) {
 			log.Fatal(err)
 		}
 		send++
-		if end {
-			atomic.AddInt32(&done, 1)
-			return
-		}
+		//if end {
+		//	atomic.AddInt32(&done, 1)
+		//	return
+		//}
 		//var buf []byte
 		//_, buf, err := ws.ReadMessage()
 		//if err != nil {
@@ -92,12 +92,16 @@ func Worker(id int) {
 
 		// 自定义数量
 
-		//if send > msgNums {
-		//	// 结束全部任务
-		//	atomic.AddInt32(&done, 1)
-		//	return
-		//}
+		if send%msgNums == 0 {
+			// 结束全部任务
+			time.Sleep(time.Second)
 
+		}
+
+		if send > 3*msgNums {
+			atomic.AddInt32(&done, 1)
+			return
+		}
 		//time.Sleep(time.Second)
 	}
 }
@@ -105,14 +109,15 @@ func Worker(id int) {
 func Test_A(t *testing.T) {
 	// 建立连接
 	//循环次数就是连接的数量
-	//for i := range [70][0]int{} {
+	//for i := range [2000][0]int{} {
 	//	go Worker(i)
 	//	wg.Add(1)
 	//}
+
 	// 开始发送
 	go Worker(1)
-	wg.Add(1)
 	go Worker(2)
+	wg.Add(1)
 	wg.Add(1)
 	close(start)
 	// 等待发送任务完成
