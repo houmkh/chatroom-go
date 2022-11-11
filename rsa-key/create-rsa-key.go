@@ -1,4 +1,4 @@
-package main
+package rsa_key
 
 import (
 	"crypto/rand"
@@ -21,7 +21,7 @@ func GenerateRSAKey(bits int) {
 	X509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
 	//使用pem格式对x509输出的内容进行编码
 	//创建文件保存私钥
-	privateFile, err := os.Create("private.pem")
+	privateFile, err := os.Create("./rsa-key/private.pem")
 	if err != nil {
 		panic(err)
 	}
@@ -41,7 +41,7 @@ func GenerateRSAKey(bits int) {
 	}
 	//pem格式编码
 	//创建用于保存公钥的文件
-	publicFile, err := os.Create("public.pem")
+	publicFile, err := os.Create("./rsa-key/public.pem")
 	if err != nil {
 		panic(err)
 	}

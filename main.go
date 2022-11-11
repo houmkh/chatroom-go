@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chatroom/rsa-key"
 	"chatroom/serve"
 	"chatroom/serve/file_management"
 	"chatroom/serve/login"
@@ -14,6 +15,8 @@ import (
 	"github.com/jackc/pgx/v4"
 	"io"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 var (
@@ -154,8 +157,8 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			user.Username = tempUser["username"].(string)
-			//user.Uid, _ = strconv.Atoi(tempUser["uid"].(string))
-			user.Uid = int(tempUser["uid"].(float64))
+			user.Uid, _ = strconv.Atoi(tempUser["uid"].(string))
+			//user.Uid = int(tempUser["uid"].(float64))
 			user.Password = ""
 			onlineChan <- user
 			fmt.Println("login case")
@@ -248,8 +251,17 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 //)
 
 var dbConn *pgx.Conn
+var key = false
 
 func main() {
+	_, keyExist := os.Stat("./rsa-key/private.pem")
+
+	if os.IsNotExist(keyExist) {
+		rsa_key.GenerateRSAKey(1024)
+	} else {
+		key = true
+	}
+
 	//var err error
 	//dbConnParam := fmt.Sprintf(`%s://%s:%s@%s:%d/%s`, user, user, password, host, port, dbname)
 	//dbConn, err = pgx.Connect(context.Background(), dbConnParam)
