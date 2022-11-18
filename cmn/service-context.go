@@ -3,7 +3,7 @@ package cmn
 import (
 	"errors"
 	"fmt"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"net/http"
 	"strings"
 	"sync"
@@ -16,7 +16,7 @@ type ModuleAuthor struct {
 	Addi  string `json:"addi"`
 }
 type ServeEndPoint struct {
-	Fn        func(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn)
+	Fn        func(w http.ResponseWriter, r *http.Request, dbConn *pgxpool.Conn)
 	Path      string
 	Name      string
 	Developer *ModuleAuthor

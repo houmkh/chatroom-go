@@ -3,10 +3,12 @@ package file_management
 import (
 	"chatroom/cmn"
 	"chatroom/serve"
+	"chatroom/serve/reply_msg"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -59,7 +61,11 @@ func Enroll(author string) {
 
 const filePath = "D:/GoProject/chatroom/user-files"
 
-func UploadFile(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
+var (
+	msg serve.ReplyMsg
+)
+
+func UploadFile(w http.ResponseWriter, r *http.Request, conn *pgxpool.Conn) {
 	uid, _ := strconv.Atoi(r.FormValue("uid"))
 	file, header, err := r.FormFile("file")
 	if err != nil {
@@ -67,20 +73,22 @@ func UploadFile(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 		return
 	}
 	defer file.Close()
-	fmt.Println("uid:", uid)
+	//fmt.Println("uid:", uid)
 	index := strings.Index(header.Filename, ".")
 	filetype := header.Filename[index:len(header.Filename)]
 	newFilePath := filePath + "/" + r.FormValue("uid") + "_" + strconv.FormatInt(time.Now().UnixNano(), 10) + filetype
 	newFile, err := os.Create(newFilePath)
 	if err != nil {
 		fmt.Println("fail to create a file")
-		panic(err.Error())
+		//panic(err.Error())
+		fmt.Println(err)
 		return
 	}
 	_, err = io.Copy(newFile, file)
 	defer newFile.Close()
 	if err != nil {
 		fmt.Println("fail to copy file")
+		fmt.Println(err)
 		return
 	}
 	//filepath 是存储的名字 filename是用户给的文件名
@@ -88,18 +96,20 @@ func UploadFile(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 	_, err = conn.Exec(context.Background(), sqlstr, uid, newFilePath, header.Filename)
 	if err != nil {
 		fmt.Println("fail to insert into fileinfo")
+		fmt.Println(err)
 		return
 	}
-	fmt.Println("successfully upload file")
+	//fmt.Println("successfully upload file")
 
 }
 
-func ShowFiles(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
+func ShowFiles(w http.ResponseWriter, r *http.Request, conn *pgxpool.Conn) {
 	jsonMap := make(map[string]interface{})
 	buf, err := ioutil.ReadAll(r.Body)
 	err = json.Unmarshal(buf, &jsonMap)
 	if err != nil {
 		fmt.Println("fail to unmarshal")
+		fmt.Println(err)
 		return
 	}
 	uid, _ := strconv.Atoi(jsonMap["uid"].(string))
@@ -107,6 +117,7 @@ func ShowFiles(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 	resultSet, err := conn.Query(context.Background(), sqlstr, uid)
 	if err != nil {
 		fmt.Println("fail to read files")
+		fmt.Println(err)
 		return
 	}
 	err = resultSet.Err()
@@ -130,17 +141,20 @@ func ShowFiles(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 		file.Fid = fid
 		fileList = append(fileList, file)
 	}
-	fmt.Println(fileList)
-	buf, _ = json.Marshal(fileList)
-	_, err = w.Write(buf)
+	//fmt.Println(fileList)
+	msg = serve.ReplyMsg{ServeStatus: 200, ResponseMessage: "success", Data: fileList}
+
+	buf, _ = json.Marshal(msg)
+	//_, err = w.Write(buf)
+	reply_msg.Response(w, &msg)
 	if err != nil {
 		fmt.Println("fail to write back")
 		return
 	}
-	fmt.Println("successfully send file list back")
+	//fmt.Println("successfully send file list back")
 }
 
-func DownloadFile(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
+func DownloadFile(w http.ResponseWriter, r *http.Request, conn *pgxpool.Conn) {
 	buf, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println("get request body fail")
@@ -158,7 +172,7 @@ func DownloadFile(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 	var filepath string
 	err = result.Scan(&filepath)
 	if err == pgx.ErrNoRows {
-		fmt.Println(err.Error())
+		fmt.Println(err)
 		return
 	}
 
@@ -166,7 +180,7 @@ func DownloadFile(w http.ResponseWriter, r *http.Request, conn *pgx.Conn) {
 	fmt.Println(filepath)
 	if err != nil {
 		fmt.Println("fail to read file")
-		fmt.Println(err.Error())
+		fmt.Println(err)
 		return
 	}
 	w.Write(filebuf)

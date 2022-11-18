@@ -1,8 +1,9 @@
 package serve
 
 type ReplyMsg struct {
-	ServeStatus     int    `json:"serve_status"`
-	ResponseMessage string `json:"response_message"`
+	ServeStatus     int         `json:"serve_status"`
+	ResponseMessage string      `json:"response_message"`
+	Data            interface{} `json:"data"`
 }
 
 type BroadcastData struct {

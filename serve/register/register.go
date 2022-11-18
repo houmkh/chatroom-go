@@ -7,7 +7,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"io/ioutil"
 	"net/http"
 )
@@ -36,27 +37,31 @@ func Enroll(author string) {
 		Developer: developer,
 	})
 }
-func Register(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
-	fmt.Println("func register begin")
+func Register(w http.ResponseWriter, r *http.Request, dbConn *pgxpool.Conn) {
+	var msg serve.ReplyMsg
 	var err error
 	buf, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println(err.Error())
-		msg := serve.ReplyMsg{ServeStatus: -200, ResponseMessage: "read msg failed"}
+		msg = serve.ReplyMsg{ServeStatus: -200, ResponseMessage: "read msg failed"}
 		reply_msg.Response(w, &msg)
 		return
 	}
 	jsonMap := make(map[string]interface{})
 	err = json.Unmarshal(buf, &jsonMap)
+
 	sqlstr := `insert into userinfo(username,pwd,privilege) values($1,$2,1)`
-	_, err = dbConn.Exec(context.Background(), sqlstr, jsonMap["username"], jsonMap["password"], 1)
+	_, err = dbConn.Exec(context.Background(), sqlstr, jsonMap["username"], jsonMap["password"])
+
+	//testsql := `insert into testuser(username,pwd,privilege) values($1,$2,1)`
+	//_, err = dbConn.Exec(context.Background(), testsql, jsonMap["username"], jsonMap["password"])
+
 	if err != nil {
-		fmt.Println(err.Error())
-		msg := serve.ReplyMsg{ServeStatus: -300, ResponseMessage: "failed to insert into db"}
-		reply_msg.Response(w, &msg)
+		fmt.Println(err)
+		msg = serve.ReplyMsg{ServeStatus: -300, ResponseMessage: "failed to insert into db"}
 	} else {
-		msg := serve.ReplyMsg{ServeStatus: 0, ResponseMessage: "successfully insert userinfo"}
-		reply_msg.Response(w, &msg)
+		msg = serve.ReplyMsg{ServeStatus: 200, ResponseMessage: "successfully register"}
 	}
+	reply_msg.Response(w, &msg)
 
 }

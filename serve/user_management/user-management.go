@@ -7,7 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"io/ioutil"
 	"net/http"
 )
@@ -51,7 +51,7 @@ func Enroll(author string) {
 		Developer: developer,
 	})
 }
-func ShowUsersInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
+func ShowUsersInfo(w http.ResponseWriter, r *http.Request, dbConn *pgxpool.Conn) {
 	fmt.Println("func show users begin")
 	//var err error
 	//if err != nil {
@@ -78,7 +78,7 @@ func ShowUsersInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 	w.Write(buf)
 }
 
-func DeleteUser(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
+func DeleteUser(w http.ResponseWriter, r *http.Request, dbConn *pgxpool.Conn) {
 
 	buf, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -101,7 +101,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
 	reply_msg.Response(w, &msg)
 	fmt.Println("successfully delete user")
 }
-func ChangeUserInfo(w http.ResponseWriter, r *http.Request, dbConn *pgx.Conn) {
+func ChangeUserInfo(w http.ResponseWriter, r *http.Request, dbConn *pgxpool.Conn) {
 	buf, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println("get user id failed")

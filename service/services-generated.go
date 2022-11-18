@@ -7,9 +7,7 @@ import (
 	"chatroom/serve/file_management" //file_management ,  file_management, 15521212871, jiaying.hou@qq.com
 	"chatroom/serve/login" //login ,  login, 15521212871, jiaying.hou@qq.com
 	"chatroom/serve/register" //register ,  register, 15521212871, jiaying.hou@qq.com
-	"chatroom/serve/test" //test ,  user_management, 15521212871, jiaying.hou@qq.com
 	"chatroom/serve/user_management" //user_management ,  user_management, 15521212871, jiaying.hou@qq.com
-	"chatroom/serve/xxx" //xxx ,  user_management, 15521212871, jiaying.hou@qq.com
 )
 
 //Enroll will be called from serve cmd
@@ -18,7 +16,5 @@ func Enroll(){
   file_management.Enroll(`{"name":"file_management","tel":"15521212871","email":"jiaying.hou@qq.com"}`)
   login.Enroll(`{"name":"login","tel":"15521212871","email":"jiaying.hou@qq.com"}`)
   register.Enroll(`{"name":"register","tel":"15521212871","email":"jiaying.hou@qq.com"}`)
-  test.Enroll(`{"name":"user_management","tel":"15521212871","email":"jiaying.hou@qq.com"}`)
   user_management.Enroll(`{"name":"user_management","tel":"15521212871","email":"jiaying.hou@qq.com"}`)
-  xxx.Enroll(`{"name":"user_management","tel":"15521212871","email":"jiaying.hou@qq.com"}`)
 }
